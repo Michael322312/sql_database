@@ -21,6 +21,27 @@ db.execute('''CREATE TABLE IF NOT EXISTS courses(
            FOREIGN KEY (course_id) REFERENCES courses (course_id));''')"""
 
 
+def add_user(db, name, age, major):
+    db.execute(f'''INSERT INTO students(name, age, major)
+               VALUES  (?, ?, ?)''', (name, age, major))
+    db.commit()
+    
+
+def add_course(db, course_name, instructor):
+    db.execute(f'''INSERT INTO courses(course_name, instructor)
+               VALUES  (?, ?)''', (course_name, instructor))
+    db.commit()
+
+
+def get_students(db):
+    students = db.execute('''SELECT * FROM students''')
+    return db.execute('''SELECT * FROM students''')
+
+def get_courses(db):
+    courses = db.execute('''SELECT * FROM courses''')
+    return courses
+
+
 
 while True:
     print("\n1. Додати нового студента")
@@ -35,13 +56,20 @@ while True:
     
     match choice:
         case "1":
-            pass
+            name = input("Введіть ім'я студента:")
+            age = int(input("Введіть вік студента:"))
+            major = input("Введіть дисципліну студента:")
+            add_user(db, name, age, major)
+            print(f"Студент {name} успішно доданий")
         case "2":
-            pass
+            name = input("Введіть ім'я курсу:")
+            instructor = input("Введіть вчителя курсу:")
+            add_course(db, name, instructor)
+            print(f"Курс {name} успішно створений")
         case "3":
-            pass
+            print("Ось список студентів:",get_students(db))
         case "4":
-            pass
+            print("Ось список курсів:", get_courses(db))
         case "5":
             pass
         case "6":
