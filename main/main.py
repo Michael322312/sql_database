@@ -4,7 +4,7 @@ import sqlite3
 db = sqlite3.connect('university.db')
 
 db.execute('''CREATE TABLE IF NOT EXISTS students(
-           id INTEGER PRIMARY KEY AUTOINCREMENT,
+           student_id INTEGER PRIMARY KEY AUTOINCREMENT,
            name VARCHAR(50),
            age INTEGER,
            major VARCHAR(50));''')
@@ -15,11 +15,9 @@ db.execute('''CREATE TABLE IF NOT EXISTS courses(
            instructor VARCHAR(50));''')
 
 db.execute('''CREATE TABLE IF NOT EXISTS student_course(
-           student_id INTEGER,
-           course_id INTEGER,
-           PRIMARY KEY (student_id, course_id),
-           FOREIGN KEY (student_id) REFERENCES students (id),
-           FOREIGN KEY (course_id) REFERENCES courses (course_id));''')
+           student_id INTEGER REFERENCES students (student_id),
+           course_id INTEGER REFERENCES students (course_id),
+           PRIMARY KEY (student_id, course_id));''')
 
 
 def add_user(db, name, age, major):
@@ -43,15 +41,23 @@ def get_students(db):
     dict_std = {}
     for student in students:
         dict_std[student[0]] = {'name': student[1], "age": student[2], "major": student[3]}
+    db.commit()
+
     return dict_std
 
 def get_courses(db):
-    return db.execute('''SELECT * FROM courses''')
+    courses = db.execute('''SELECT * FROM courses''')
+    dict_cour = {}
+    for course in courses:
+        dict_cour[course[0]] = {'course_name': course[1], "instructor": course[2]}
+    db.commit()
+
+    return dict_cour
 
 
 def get_student_courses(db, course_id):
     courses_ids = db.execute(f'''SELECT student_id FROM student_course WHERE course_id == {course_id}''')
-    students = [db.execute(f'''SELECT * FROM students WHERE id == {int(i)}''') for i in courses_ids]
+    students = [db.execute(f'''SELECT * FROM students WHERE student_id == {int(i[0])}''') for i in courses_ids]
     return students
 
 
@@ -83,22 +89,15 @@ while True:
         case "4":
             print("Ось список курсів:", get_courses(db))
         case "5":
-            student_id = int(input("Введіть id студента"))
-            course_id = int(input("Введіть id курсу"))
+            student_id = int(input("Введіть id студента "))
+            course_id = int(input("Введіть id курсу "))
             add_to_student_course(db, student_id, course_id)
-            print("YAY")
+            print("Студента успішно додано до курсу!")
         case "6":
-            course_id = int(input(""))
-            print([i.name for i in get_student_courses(db, course_id)])
+            course_id = int(input("Введіть id курсу:"))
+            print([i.fetchall() for i in get_student_courses(db, course_id)])
         case "7":
-            pass
+            break
         case _:
             print("Некоректний вибір. Будь ласка, введіть число від 1 до 7.")
 
-
-
-"""INSERT INTO students(name, age, major)
-VALUES  ("STudent6", 126, "major61")
-INSERT INTO courses(course_name, instructor)
-VALUES  ("instructor3243", "123")
-"""
