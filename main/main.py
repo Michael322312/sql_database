@@ -1,3 +1,4 @@
+
 import sqlite3
 
 db = sqlite3.connect('university.db')
@@ -13,12 +14,12 @@ db.execute('''CREATE TABLE IF NOT EXISTS courses(
            course_name VARCHAR(50),
            instructor VARCHAR(50));''')
 
-"""db.execute('''CREATE TABLE IF NOT EXISTS student_course(
+db.execute('''CREATE TABLE IF NOT EXISTS student_course(
            student_id INTEGER,
            course_id INTEGER,
            PRIMARY KEY (student_id, course_id),
            FOREIGN KEY (student_id) REFERENCES students (id),
-           FOREIGN KEY (course_id) REFERENCES courses (course_id));''')"""
+           FOREIGN KEY (course_id) REFERENCES courses (course_id));''')
 
 
 def add_user(db, name, age, major):
@@ -32,15 +33,26 @@ def add_course(db, course_name, instructor):
                VALUES  (?, ?)''', (course_name, instructor))
     db.commit()
 
+def add_to_student_course(db, student_id, course_id):
+    db.execute(f'''INSERT INTO student_course(student_id, course_id)
+               VALUES  (?, ?)''', (student_id, course_id))
+    db.commit()
 
 def get_students(db):
     students = db.execute('''SELECT * FROM students''')
-    return db.execute('''SELECT * FROM students''')
+    dict_std = {}
+    for student in students:
+        dict_std[student[0]] = {'name': student[1], "age": student[2], "major": student[3]}
+    return dict_std
 
 def get_courses(db):
-    courses = db.execute('''SELECT * FROM courses''')
-    return courses
+    return db.execute('''SELECT * FROM courses''')
 
+
+def get_student_courses(db, course_id):
+    courses_ids = db.execute(f'''SELECT student_id FROM student_course WHERE course_id == {course_id}''')
+    students = [db.execute(f'''SELECT * FROM students WHERE id == {int(i)}''') for i in courses_ids]
+    return students
 
 
 while True:
@@ -67,13 +79,17 @@ while True:
             add_course(db, name, instructor)
             print(f"Курс {name} успішно створений")
         case "3":
-            print("Ось список студентів:",get_students(db))
+            print("Ось список студентів:", get_students(db))
         case "4":
             print("Ось список курсів:", get_courses(db))
         case "5":
-            pass
+            student_id = int(input("Введіть id студента"))
+            course_id = int(input("Введіть id курсу"))
+            add_to_student_course(db, student_id, course_id)
+            print("YAY")
         case "6":
-            pass
+            course_id = int(input(""))
+            print([i.name for i in get_student_courses(db, course_id)])
         case "7":
             pass
         case _:
