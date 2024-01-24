@@ -36,6 +36,10 @@ def add_to_student_course(db, student_id, course_id):
                VALUES  (?, ?)''', (student_id, course_id))
     db.commit()
 
+def edit_student(db, student_id, name, age, major):
+    db.execute("UPDATE students SET name = ?, age = ?, major = ? WHERE student_id = ?", (name,age,major,student_id))
+    db.commit()
+
 def get_students(db):
     students = db.execute('''SELECT * FROM students''')
     dict_std = {}
@@ -68,7 +72,8 @@ while True:
     print("4. Показати список курсів")
     print("5. Зареєструвати студента на курс")
     print("6. Показати студентів на конкретному курсі")
-    print("7. Вийти")
+    print("7. Оновити інформацію студента")
+    print("8. Вийти")
 
     choice = input("Оберіть опцію (1-7): ")
     
@@ -97,6 +102,12 @@ while True:
             course_id = int(input("Введіть id курсу:"))
             print([i.fetchall() for i in get_student_courses(db, course_id)])
         case "7":
+            student_id = int(input("Student id to edit:"))
+            name = input('Name:')
+            age = int(input("Age:"))
+            major = input("Major:")
+            edit_student(db, student_id, name, age, major)
+        case "8":
             break
         case _:
             print("Некоректний вибір. Будь ласка, введіть число від 1 до 7.")
